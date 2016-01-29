@@ -1,0 +1,56 @@
+---
+- hosts: all
+  vars:
+    venv: "/root/system_tracking_env"
+    proj_dir: "/root/system_tracking"
+    pg_user: "fact"
+    pg_database: "fact"
+    pg_password: "3CjxA0Bo2oIOeBNUH5wN"
+  roles:
+    - role: postgresql
+      postgresql_version: 9.4
+      tags: postgresql
+  tasks:
+    - name: Install deps
+      apt:
+        name: "{{ item }}"
+      with_items:
+        - "python-pip"
+        - "git"
+        - "python-dev"
+        - "postgresql-server-dev-9.4"
+
+    - name: copy gitlab key file
+      copy:
+        src: "{{ playbook_dir }}/files/gitlab_id_rsa"
+        dest: "/root/gitlab_id_rsa"
+        mode: "0600"
+
+    - name: dl project from gitlab
+      git:
+        repo: "git@gitlab.com:chris-meyers-fsu/system_tracking.git"
+        dest: "{{ proj_dir }}"
+        key_file: "/root/gitlab_id_rsa"
+        accept_hostkey: true
+
+    - name: Install project python deps
+      pip:
+        requirements: "{{ proj_dir }}/requirements.txt"
+
+    - name: create postgres user
+      sudo: yes
+      sudo_user: postgres
+      postgresql_user:
+        name: "{{ pg_user }}"
+        password: "{{ pg_password }}"
+
+    - name: create postgres db
+      postgresql_db:
+        name: "{{ pg_database }}"
+        login_user: "postgres"
+        owner: "{{ pg_user }}"
+
+    - name: migrate
+      shell: "./manage.py migrate"
+      args:
+        chdir: "{{ proj_dir }}/awx/" 

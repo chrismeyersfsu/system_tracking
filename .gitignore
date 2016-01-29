@@ -1,0 +1,3 @@
+*.pyc
+playbooks/roles/postgresql
+*.swp
