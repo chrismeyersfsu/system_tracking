@@ -9,10 +9,10 @@ class Fact(models.Model):
     Facts are stored as JSON dictionaries, individually if at all possible.
     """
     host = models.ForeignKey(Host)
-    timestamp = models.DateTimeField(default=None, editable=False, db_index=True)
+    timestamp = models.DateTimeField(default=None, editable=False)
     created = models.DateTimeField(editable=False, auto_now_add=True)
     modified = models.DateTimeField(editable=False, auto_now=True)
-    module = models.CharField(max_length=128, db_index=True)
+    module = models.CharField(max_length=128)
     facts = JSONField(blank=True, default={})
 
     index_together = [
