@@ -83,7 +83,7 @@ DATABASES = {
         'NAME': 'fact',
         'USER': 'fact',
         'PASSWORD': '3CjxA0Bo2oIOeBNUH5wN',
-        'HOST': 'systemtracking.cs2mza4ggwts.us-east-1.rds.amazonaws.com',
+        'HOST': '52.23.198.141',
         'PORT': 5432,
     }
 }
