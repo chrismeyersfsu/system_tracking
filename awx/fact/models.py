@@ -8,14 +8,16 @@ class Fact(models.Model):
     """A model representing a fact returned from Ansible.
     Facts are stored as JSON dictionaries, individually if at all possible.
     """
-    host = models.ForeignKey(Host)
-    timestamp = models.DateTimeField(default=None, editable=False)
+    host = models.ForeignKey(Host, db_index=True)
+    timestamp = models.DateTimeField(default=None, editable=False, db_index=True)
     created = models.DateTimeField(editable=False, auto_now_add=True)
     modified = models.DateTimeField(editable=False, auto_now=True)
-    module = models.CharField(max_length=128)
+    module = models.CharField(max_length=128, db_index=True)
     facts = JSONField(blank=True, default={})
 
-    index_together = [
-        ["timestamp", "module", "host"],
-    ]
+    class Meta:
+    	index_together = [
+        	["timestamp", "module", "host"],
+        	["timestamp", "module"],
+    	]
 

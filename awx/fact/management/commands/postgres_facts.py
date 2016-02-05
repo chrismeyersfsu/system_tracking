@@ -128,8 +128,6 @@ class Experiment(object):
         self.scan_timestamp_end = Fact.objects.filter(host__id=self.hosts[0].id).values_list('timestamp', flat=True).order_by('-timestamp')[0]
         self.scan_timestamp_diff = self.scan_timestamp_end - self.scan_timestamp_begin
 
-        #print("%s - %s = %s" % (self.scan_timestamp_end, self.scan_timestamp_begin, self.scan_timestamp_diff))
-
     def get_rand_scan_timestamp(self):
         return self.scan_timestamps[random.randint(0, self.scan_timestamps_len-1)]
 
@@ -175,11 +173,8 @@ class Experiment(object):
         for i in xrange(0, runs):
             rand_scan_timestamp = self.generate_rand_timestamp()
             time_before = datetime.now()
-            #host_ids = Fact.objects.annotate(host_id=Max('host__id')).values_list('host_id', flat=True)
-            
-            results = Fact.objects.filter(host__id__in=self.host_ids, module=module_name, timestamp__lte=rand_scan_timestamp).order_by('host__id', 'timestamp').distinct('host__id')
-            print(results.query)
-            #list(results)
+            results = Fact.objects.filter(host__id__in=self.host_ids, module=module_name, timestamp__lte=rand_scan_timestamp).order_by('host__id', '-timestamp').distinct('host__id')
+            list(results)
             time_after = datetime.now()
             time_diffs.append(time_after - time_before)
 
@@ -203,14 +198,13 @@ class Command(BaseCommand):
     )
 
     def handle(self, *args, **options):
-        runs = 1
+        runs = 20
         if options.get('drop'):
             #Fact.objects.all().delete()
             #Host.objects.all().delete()
             os.system("./manage.py flush --noinput")
             os.system("./manage.py makemigrations")
             os.system("./manage.py migrate")
-            pass
         
         if options.get('generate_workload'):
             wg = WorkloadGenerator()
