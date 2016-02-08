@@ -18,6 +18,7 @@ from django.utils import timezone
 from django.conf import settings
 from django.core.management.base import CommandError, BaseCommand
 from django.db import connection
+from django.db.models import Max
 
 
 class WorkloadGenerator(object):
@@ -161,8 +162,7 @@ class Experiment(object):
             rand_host = self.get_rand_host()
             rand_scan_timestamp = self.generate_rand_timestamp()
             time_before = datetime.now()
-            results = Fact.objects.filter(host__id=rand_host.id, module=module_name, timestamp__lte=rand_scan_timestamp).order_by('timestamp')
-            list(results)
+            results = Fact.objects.filter(host__id=rand_host.id, module=module_name, timestamp__lte=rand_scan_timestamp).order_by('-timestamp')[0]
             time_after = datetime.now()
             time_diffs.append(time_after - time_before)
         
@@ -173,6 +173,7 @@ class Experiment(object):
         for i in xrange(0, runs):
             rand_scan_timestamp = self.generate_rand_timestamp()
             time_before = datetime.now()
+            #results = Fact.objects.filter(host__id__in=self.host_ids, module=module_name, timestamp__lte=rand_scan_timestamp).order_by('host__id', '-timestamp').distinct('host__id').values('host_id', 'timestamp', 'module')
             results = Fact.objects.filter(host__id__in=self.host_ids, module=module_name, timestamp__lte=rand_scan_timestamp).order_by('host__id', '-timestamp').distinct('host__id')
             list(results)
             time_after = datetime.now()
